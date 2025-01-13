@@ -3,7 +3,7 @@ import GameGrid from '@/components/GameGrid';
 import Legend from '@/components/Legend';
 import InfoBox from '@/components/InfoBox';
 import MessageBox from '@/components/MessageBox';
-import { GameState, TerrainType } from '@/types/game';
+import { GameState, TerrainType, UnitType } from '@/types/game';
 import { useToast } from '@/components/ui/use-toast';
 
 const Index = () => {
@@ -13,6 +13,8 @@ const Index = () => {
     units: {},
     messages: ['Welcome Commander! Awaiting your orders...'],
   });
+
+  const [nextUnitLetter, setNextUnitLetter] = useState<string>('A');
 
   // Initialize the game board with a fixed map layout
   useEffect(() => {
@@ -31,10 +33,46 @@ const Index = () => {
       ...prev,
       grid: fixedGrid,
       units: {
-        'friendly-1': { id: 'friendly-1', type: 'friendly', x: 1, y: 0 },
+        'friendly-1': { id: 'friendly-1', type: 'friendly', x: 1, y: 0, name: 'A' },
         'enemy-1': { id: 'enemy-1', type: 'enemy', x: 7, y: 7 },
       },
     }));
+  }, []);
+
+  // Enemy movement
+  useEffect(() => {
+    const moveInterval = setInterval(() => {
+      setGameState(prev => {
+        const newUnits = { ...prev.units };
+        Object.values(newUnits)
+          .filter(unit => unit.type === 'enemy')
+          .forEach(enemy => {
+            // Simple pathfinding towards base (0,0)
+            const newX = enemy.x > 0 ? enemy.x - 1 : enemy.x;
+            const newY = enemy.y > 0 ? enemy.y - 1 : enemy.y;
+            newUnits[enemy.id] = { ...enemy, x: newX, y: newY };
+          });
+        return { ...prev, units: newUnits };
+      });
+    }, 5000);
+
+    return () => clearInterval(moveInterval);
+  }, []);
+
+  // Enemy spawning
+  useEffect(() => {
+    const spawnInterval = setInterval(() => {
+      setGameState(prev => {
+        const enemyId = `enemy-${Date.now()}`;
+        const newUnits = {
+          ...prev.units,
+          [enemyId]: { id: enemyId, type: 'enemy', x: 7, y: 7 },
+        };
+        return { ...prev, units: newUnits };
+      });
+    }, 10000);
+
+    return () => clearInterval(spawnInterval);
   }, []);
 
   const handleSendMessage = (message: string) => {

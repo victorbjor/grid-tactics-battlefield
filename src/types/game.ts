@@ -5,6 +5,7 @@ export type UnitType = {
   type: 'friendly' | 'enemy';
   x: number;
   y: number;
+  name?: string;
 };
 
 export type GameState = {
