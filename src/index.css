@@ -86,3 +86,19 @@
     transform: translateY(0);
   }
 }
+
+.combat-bullet {
+  @apply absolute w-2 h-2 bg-yellow-400 rounded-full;
+  animation: bulletFly 0.5s linear infinite;
+}
+
+@keyframes bulletFly {
+  0% {
+    transform: translate(0, 0) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) scale(1.2);
+    opacity: 0;
+  }
+}
