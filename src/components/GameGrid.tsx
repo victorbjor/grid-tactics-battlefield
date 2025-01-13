@@ -14,7 +14,7 @@ const GameGrid: React.FC<GameGridProps> = ({ grid, units }) => {
     return (
       <div 
         key={cellKey}
-        className={`grid-cell cell-${terrain || 'ground'} relative`}
+        className={`grid-cell cell-${terrain || 'ground'} relative border-r border-b border-gray-200 last:border-r-0`}
         data-coordinates={`${String.fromCharCode(65 + x)}${y + 1}`}
       >
         {unit && (
@@ -25,7 +25,7 @@ const GameGrid: React.FC<GameGridProps> = ({ grid, units }) => {
   };
 
   return (
-    <div className="grid grid-cols-8 gap-0 border border-gray-300">
+    <div className="grid grid-cols-8 border-l border-t border-gray-200">
       {grid.map((row, y) => (
         <React.Fragment key={y}>
           {row.map((cell, x) => renderCell(cell, x, y))}
