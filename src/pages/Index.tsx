@@ -14,21 +14,22 @@ const Index = () => {
     messages: ['Welcome Commander! Awaiting your orders...'],
   });
 
-  // Initialize the game board
+  // Initialize the game board with a fixed map layout
   useEffect(() => {
-    const initialGrid = gameState.grid.map((row, y) => 
-      row.map((_, x) => {
-        if (x === 0 && y === 0) return 'base';
-        if (Math.random() < 0.2) return 'hill';
-        if (Math.random() < 0.2) return 'forest';
-        if (Math.random() < 0.1) return 'water';
-        return 'ground';
-      })
-    );
+    const fixedGrid: TerrainType[][] = [
+      ['base', 'ground', 'ground', 'ground', 'forest', 'forest', 'ground', 'ground'],
+      ['ground', 'ground', 'hill', 'ground', 'forest', 'forest', 'ground', 'ground'],
+      ['ground', 'water', 'water', 'ground', 'ground', 'ground', 'ground', 'ground'],
+      ['ground', 'water', 'water', 'water', 'ground', 'hill', 'ground', 'ground'],
+      ['ground', 'ground', 'water', 'ground', 'ground', 'ground', 'forest', 'forest'],
+      ['ground', 'ground', 'ground', 'ground', 'hill', 'ground', 'forest', 'forest'],
+      ['ground', 'forest', 'forest', 'ground', 'ground', 'ground', 'ground', 'ground'],
+      ['ground', 'forest', 'forest', 'ground', 'ground', 'water', 'water', 'ground'],
+    ];
 
     setGameState(prev => ({
       ...prev,
-      grid: initialGrid,
+      grid: fixedGrid,
       units: {
         'friendly-1': { id: 'friendly-1', type: 'friendly', x: 1, y: 0 },
         'enemy-1': { id: 'enemy-1', type: 'enemy', x: 7, y: 7 },
@@ -37,8 +38,6 @@ const Index = () => {
   }, []);
 
   const handleSendMessage = (message: string) => {
-    // Here you would normally send the message to your backend
-    // For now, we'll just add it to the messages
     setGameState(prev => ({
       ...prev,
       messages: [...prev.messages, `Command: ${message}`],
