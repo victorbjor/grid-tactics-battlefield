@@ -63,12 +63,33 @@ const GameGrid: React.FC<GameGridProps> = ({ grid, units }) => {
   };
 
   return (
-    <div className="inline-grid grid-cols-8">
-      {grid.map((row, y) => (
-        <React.Fragment key={y}>
-          {row.map((cell, x) => renderCell(cell, x, y))}
-        </React.Fragment>
-      ))}
+    <div className="relative">
+      {/* Column labels (A-L) */}
+      <div className="absolute -top-6 left-6 right-0 flex">
+        {Array.from({length: 12}).map((_, i) => (
+          <div key={`col-${i}`} className="w-12 text-center">
+            {String.fromCharCode(65 + i)}
+          </div>
+        ))}
+      </div>
+
+      {/* Row labels (1-12) */}
+      <div className="absolute -left-6 top-6 bottom-0 flex flex-col justify-between">
+        {Array.from({length: 12}).map((_, i) => (
+          <div key={`row-${i}`} className="h-12 flex items-center justify-center">
+            {i + 1}
+          </div>
+        ))}
+      </div>
+
+      {/* Grid */}
+      <div className="inline-grid grid-cols-12 ml-6 mt-6">
+        {grid.map((row, y) => (
+          <React.Fragment key={y}>
+            {row.map((cell, x) => renderCell(cell, x, y))}
+          </React.Fragment>
+        ))}
+      </div>
     </div>
   );
 };

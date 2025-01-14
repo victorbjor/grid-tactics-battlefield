@@ -5,6 +5,7 @@ import InfoBox from '@/components/InfoBox';
 import MessageBox from '@/components/MessageBox';
 import { GameState, TerrainType, UnitType } from '@/types/game';
 import { useToast } from '@/components/ui/use-toast';
+import { moveEnemyUnits } from '@/lib/utils';
 
 const Index = () => {
   const { toast } = useToast();
@@ -19,14 +20,18 @@ const Index = () => {
   // Initialize the game board with a fixed map layout
   useEffect(() => {
     const fixedGrid: TerrainType[][] = [
-      ['base', 'ground', 'ground', 'ground', 'forest', 'forest', 'ground', 'ground'],
-      ['ground', 'ground', 'hill', 'ground', 'forest', 'forest', 'ground', 'ground'],
-      ['ground', 'water', 'water', 'ground', 'ground', 'ground', 'ground', 'ground'],
-      ['ground', 'water', 'water', 'water', 'ground', 'hill', 'ground', 'ground'],
-      ['ground', 'ground', 'water', 'ground', 'ground', 'ground', 'forest', 'forest'],
-      ['ground', 'ground', 'ground', 'ground', 'hill', 'ground', 'forest', 'forest'],
-      ['ground', 'forest', 'forest', 'ground', 'ground', 'ground', 'ground', 'ground'],
-      ['ground', 'forest', 'forest', 'ground', 'ground', 'water', 'water', 'ground'],
+      ['base', 'ground', 'ground', 'ground', 'forest', 'forest', 'forest', 'ground', 'ground', 'water', 'water', 'ground'],
+      ['ground', 'ground', 'hill', 'ground', 'forest', 'forest', 'forest', 'ground', 'ground', 'water', 'water', 'water'],
+      ['ground', 'water', 'water', 'ground', 'ground', 'forest', 'ground', 'ground', 'ground', 'ground', 'water', 'water'],
+      ['ground', 'water', 'water', 'water', 'ground', 'ground', 'ground', 'hill', 'ground', 'ground', 'ground', 'ground'],
+      ['ground', 'ground', 'water', 'water', 'ground', 'ground', 'ground', 'ground', 'forest', 'forest', 'forest', 'ground'],
+      ['ground', 'ground', 'ground', 'ground', 'hill', 'ground', 'ground', 'ground', 'forest', 'forest', 'forest', 'ground'],
+      ['ground', 'forest', 'forest', 'ground', 'ground', 'ground', 'water', 'water', 'ground', 'ground', 'ground', 'ground'],
+      ['ground', 'forest', 'forest', 'forest', 'ground', 'ground', 'water', 'water', 'water', 'ground', 'hill', 'ground'],
+      ['ground', 'ground', 'forest', 'forest', 'ground', 'ground', 'ground', 'water', 'ground', 'ground', 'ground', 'ground'],
+      ['ground', 'ground', 'ground', 'ground', 'water', 'water', 'ground', 'ground', 'ground', 'forest', 'forest', 'ground'],
+      ['ground', 'hill', 'ground', 'ground', 'water', 'water', 'water', 'ground', 'ground', 'forest', 'forest', 'forest'],
+      ['ground', 'ground', 'ground', 'ground', 'ground', 'water', 'ground', 'ground', 'ground', 'ground', 'forest', 'forest'],
     ];
 
     setGameState(prev => ({
@@ -34,26 +39,15 @@ const Index = () => {
       grid: fixedGrid,
       units: {
         'friendly-1': { id: 'friendly-1', type: 'friendly', x: 1, y: 0, name: 'A' },
-        'enemy-1': { id: 'enemy-1', type: 'enemy', x: 7, y: 7 },
+        'enemy-1': { id: 'enemy-1', type: 'enemy', x: 11, y: 11, name: "1" },
       },
     }));
   }, []);
 
-  // Enemy movement
+  // Enemy movement effect
   useEffect(() => {
     const moveInterval = setInterval(() => {
-      setGameState(prev => {
-        const newUnits = { ...prev.units };
-        Object.values(newUnits)
-          .filter(unit => unit.type === 'enemy')
-          .forEach(enemy => {
-            // Simple pathfinding towards base (0,0)
-            const newX = enemy.x > 0 ? enemy.x - 1 : enemy.x;
-            const newY = enemy.y > 0 ? enemy.y - 1 : enemy.y;
-            newUnits[enemy.id] = { ...enemy, x: newX, y: newY };
-          });
-        return { ...prev, units: newUnits };
-      });
+      setGameState(moveEnemyUnits);
     }, 5000);
 
     return () => clearInterval(moveInterval);
@@ -66,11 +60,11 @@ const Index = () => {
         const enemyId = `enemy-${Date.now()}`;
         const newUnits = {
           ...prev.units,
-          [enemyId]: { id: enemyId, type: 'enemy', x: 7, y: 7 },
+          [enemyId]: { id: enemyId, type: 'enemy' as const, x: 11, y: 11, name: "1" },
         };
         return { ...prev, units: newUnits };
       });
-    }, 10000);
+    }, 20000);
 
     return () => clearInterval(spawnInterval);
   }, []);
