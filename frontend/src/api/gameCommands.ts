@@ -1,4 +1,9 @@
-import { GameState } from '@/types/game';
+import { GameState } from '../types/game';
+
+
+
+
+
 
 export function handleGameCommand(command: string, currentState: GameState): GameState {
   // Parse command like "unit A to C4"
