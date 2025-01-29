@@ -2,12 +2,12 @@ import { GameState, UnitType } from "../types/game";
 
 type CommandMessage = {
     type: "command";
-    data: string;
+    data: {command: string};
 }
 
 type GameStateMessage = {
     type: "gamestate";
-    data: UnitType[];
+    data: {units: UnitType[], messages: string[]};
 }
 
 type WebSocketMessage = CommandMessage | GameStateMessage;
@@ -37,7 +37,7 @@ class WebSocketService {
         }
     }
 
-    subscribe(callback: (data: any) => void) {
+    subscribe(callback: (data: unknown) => void) {
         if (this.socket) {
             this.socket.onmessage = (event) => {
                 callback(event.data);
@@ -48,18 +48,23 @@ class WebSocketService {
     sendCommand(command: string) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify(
-                {type: "command", data: command} as CommandMessage
+                {type: "command", data: {command}} as CommandMessage
             ));
         }
     }
 
-    sendGameState(gameState: GameState) {
+    sendGameState(gameState: GameState, n=0) {
+        if (n > 10) return; // Prevent infinite recursion
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             const unitList = Object.values(gameState.units);
-            console.log(unitList);
             this.socket.send(JSON.stringify(
-                {type: "gamestate", data: unitList} as GameStateMessage
+                {type: "gamestate", data: {units: unitList, messages: gameState.messages}} as GameStateMessage
             ));
+        } else {
+            console.log('WebSocket is not open. Retrying...');
+            // Attempt to resend the game state after 1 second
+            setTimeout(() => this.sendGameState(gameState), 1000);
+            
         }
     }
 

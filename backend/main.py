@@ -1,9 +1,14 @@
 from enum import Enum
+import json
+import pickle
 from pprint import pprint
-from typing import Union
+from typing import Union, List
+from unittest.mock import Base
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+
+from backend.custom_types import GameStateMessage, MessageType, MovementMethod, Order, Position, Score, UnitID, UnitName, WebSocketMessage, UnitType
+from backend.decision_layer import call_order_layer
 
 app = FastAPI()
 
@@ -16,84 +21,76 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-### Order structure
-class UnitName(BaseModel):
-    name: str = Field(description="The name of the unit, given with two capital letters A to Z")
+def format_models_json(models):
+    return json.dumps([model.dict() for model in models], indent=4)
 
-class Position(BaseModel):
-    row: str = Field(description="The row of the position, given in a capital letter A to L")
-    column: int = Field(description="The column of the position, given as a number 1 to 12")
-
-class UnitID(BaseModel):
-    id: UnitName | Position
-
-class MovementMethod(BaseModel):
-    method: str = Field(description="The movement method - either 'safe' or 'fast'", pattern="^(safe|fast)$")
-
-class Order(BaseModel):
-    unit: UnitID
-    target: Position
-    method: MovementMethod
-
-
-### Game State Data
-class GamePosition(BaseModel):
-    y: int
-    x: int
-
-class UnitType(BaseModel):
-    id: str
-    type: str #= Field(pattern="^(friendly|enemy)$")
-    target: GamePosition
-    location: GamePosition
-    ammo: int
-    name: str
-    moveSafely: bool
-
-### WebSocket Messages
-class MessageType(str, Enum):
-    GAMESTATE = "gamestate"
-    COMMAND = "command"
-
-class WebSocketMessage(BaseModel):
-    type: MessageType
-    data: Union[list[UnitType], str]
+def format_models(models):
+    header = "Model | Fields\n" + "-" * 40
+    rows = [
+        f"{model.__class__.__name__} | {', '.join(f'{k}={v}' for k, v in model.dict().items())}"
+        for model in models
+    ]
+    return "\n".join([header] + rows)
 
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
+        last_command = []
+        last_game_state = None
         while True:
             raw_data = await websocket.receive_json()
-            message = WebSocketMessage.model_validate(raw_data)
-            
+            message: WebSocketMessage = WebSocketMessage.model_validate(raw_data)
+
             if message.type == MessageType.GAMESTATE:
-                game_state = message.data
-                print('New game state received')
-                pprint(game_state)
-                continue
-            elif message.type == MessageType.COMMAND:  # TEXT
-                print(f"Received text message: {message.data}")
-                response = WebSocketMessage(
-                    type=MessageType.COMMAND,
-                    data="Server received your message: " + message.data
-                )
+                game_state: GameStateMessage = message.data # type: ignore
+                last_game_state = game_state
+                print('Game State Check!')
+            elif message.type == MessageType.COMMAND:
+                command_message: CommandMessage = message.data # type: ignore
+                last_command.append(command_message.command)
+                print('Last command:', last_command)
             else:
                 raise ValueError(f"Unknown message type: {message.type}")
-                
-            await websocket.send_json(response.model_dump())
+
+            if (len(last_command) > 0) and (last_game_state is not None):
+                new_orders = await call_order_layer(last_game_state, last_command)
+                print('New orders:', new_orders)
+                if (new_orders is not None):
+                    await websocket.send_json(new_orders.model_dump())
     except Exception as e:
         print(f"Error in websocket connection: {e}")
 
+
+leaderboard = []
+try:
+    with open("./leaderboard.pkl", "rb") as f:
+        leaderboard = pickle.load(f)
+except FileNotFoundError:
+    pass
+
+
+@app.get('/leaderboard', response_model=List[Score])
+async def get_leaderboard() -> List[Score]:
+    return leaderboard[:10]
+
+
+@app.post('/leaderboard', response_model=List[Score])
+async def post_leaderboard(new_score: Score) -> List[Score]:
+    print(new_score)
+    leaderboard.append(new_score)
+    leaderboard.sort(key=lambda x: x.score, reverse=True)
+    with open("./leaderboard.pkl", "wb") as f:
+        pickle.dump(leaderboard, f)
+
+    return leaderboard[:10]
 
 
 def issue_dummy_orders() -> Order:
     return Order(
         unit=UnitID(
             id=UnitName(name="BZ")
-            ), 
-        target=Position(row="A", column=1), 
+        ),
+        target=Position(row="A", column=1),
         method=MovementMethod(method="safe"))
-
-

@@ -54,7 +54,7 @@ const GameGrid: React.FC<GameGridProps> = ({ grid, units }) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative w-full max-w-[48rem] mx-auto">
       {/* Column labels (A-L) */}
       <div className="absolute -top-6 left-6 right-0 flex">
         {Array.from({length: 12}).map((_, i) => (
@@ -63,7 +63,7 @@ const GameGrid: React.FC<GameGridProps> = ({ grid, units }) => {
           </div>
         ))}
       </div>
-
+  
       {/* Row labels (1-12) */}
       <div className="absolute -left-6 top-6 bottom-0 flex flex-col justify-between">
         {Array.from({length: 12}).map((_, i) => (
@@ -72,7 +72,7 @@ const GameGrid: React.FC<GameGridProps> = ({ grid, units }) => {
           </div>
         ))}
       </div>
-
+  
       {/* Grid */}
       <div className="inline-grid grid-cols-12 ml-6 mt-6">
         {grid.map((row, y) => (
