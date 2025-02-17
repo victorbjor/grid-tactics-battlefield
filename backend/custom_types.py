@@ -1,6 +1,5 @@
 from enum import Enum
 from typing import Union
-from click import Command
 from pydantic import BaseModel, Field
 
 ### Order structure

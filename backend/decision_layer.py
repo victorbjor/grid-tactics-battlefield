@@ -1,22 +1,22 @@
-
-
-import asyncio
-from email.mime import base
+import os
 import json
 from typing import List
-from annotated_types import Unit
+
 import instructor
 from openai import AsyncOpenAI
 
-from backend.custom_types import EnemyInfo, FriendInfo, GameStateMessage, Order, Orders, UnitType
+from custom_types import EnemyInfo, FriendInfo, GameStateMessage, Order, Orders, UnitType
 
 
 MODEL_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 VISION_MODEL = "gemini-1.5-flash"
 DECISION_MODEL = "gemini-1.5-flash"
 
-with open("./backend/.env", "r") as f:
-    API_KEY = f.read().strip()
+
+API_KEY = os.getenv("GEMINI_API_KEY")
+
+if API_KEY is None:
+    raise ValueError("GEMINI_API_KEY environment variable is not set.")
 
 base_client = AsyncOpenAI(
     base_url= MODEL_URL,
