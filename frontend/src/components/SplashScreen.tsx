@@ -10,7 +10,7 @@ const GameOver = () => {
             {/* Game Over and Controls */}
             <div className="h-screen w-screen flex gap-8 items-center justify-center">
                 <div className="flex flex-col gap-5 items-center justify-around text-center text-white space-y-12">
-                    <h2 className="text-4xl font-bold mb-4">Lieutenant GPT</h2>
+                    <h2 className="text-4xl font-bold mb-4">Grid Tactics Battlefield</h2>
                     <div className={`flex flex-col gap-10 w-1/2 text-2xl`}>
                         <p>
                             This is a simple game, the goal is to protect a command base for as long as possible.
