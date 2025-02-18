@@ -66,7 +66,6 @@ class WebSocketMessage(BaseModel):
     data: Union[GameStateMessage, CommandMessage]
 
 
-
 class Score(BaseModel):
     name: str
     score: int
