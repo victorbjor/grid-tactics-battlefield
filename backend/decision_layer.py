@@ -142,7 +142,7 @@ Here follows the terrain layout.
 
 async def call_order_layer(game_state: GameStateMessage, command: List[str]) -> Order | None:
     try:
-        print(describe_game_state(game_state, command))
+        # print(describe_game_state(game_state, command))
         return await client.chat.completions.create(
             model=DECISION_MODEL,
             messages=[

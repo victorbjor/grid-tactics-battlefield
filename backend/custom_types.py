@@ -68,7 +68,7 @@ class WebSocketMessage(BaseModel):
 
 class Score(BaseModel):
     name: str
-    score: int
+    score: float
 
 
 class FriendInfo(BaseModel):

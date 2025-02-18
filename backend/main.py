@@ -1,7 +1,5 @@
 import os
 import json
-import pickle
-from pprint import pprint
 from typing import List, Dict
 
 from fastapi import FastAPI, WebSocket, Response
@@ -65,13 +63,13 @@ async def websocket_endpoint(websocket: WebSocket):
             elif message.type == MessageType.COMMAND:
                 command_message: CommandMessage = message.data # type: ignore
                 last_command.append(command_message.command)
-                print('Last command:', last_command)
+                print('New command received')
             else:
                 raise ValueError(f"Unknown message type: {message.type}")
 
             if (len(last_command) > 0) and (last_game_state is not None):
                 new_orders = await call_order_layer(last_game_state, last_command)
-                print('New orders:', new_orders)
+                print('New orders to', websocket)
                 if (new_orders is not None):
                     await websocket.send_json(new_orders.model_dump())
     except Exception as e:
