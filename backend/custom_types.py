@@ -27,6 +27,7 @@ class Order(BaseModel):
 
 
 class Orders(BaseModel):
+    reasoning: str = Field(description="One sentence reasoning about the cause for your orders")
     orders: list[Order]
 
 

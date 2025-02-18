@@ -44,5 +44,6 @@ type Order = {
 };
 
 export type Orders = {
+  reasoning: string;
   orders: Order[];
 };

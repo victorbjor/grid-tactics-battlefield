@@ -121,9 +121,9 @@ Each unit has a certain amount of health and ammo. If a unit runs out of either,
 You can issue commands to your units to move them around the grid and engage in combat with enemy units.
 When issued a command, a unit will run a path finding algorithm that either favors safe or fast terrain tiles, it will then move to the new tile and request new orders.
 Fighting is engaged as soon as two units are in neighboring tiles. 
-You may issue one command each to your units.
+You may issue one command each to your units, but you don't need to issue one anew to a unit if it is already has the target you desire.
 
-Here follows the terrain layout.
+Here follows the terrain layout:
               COL A\tCOL B\tCOL C\tCOL D\tCOL E\tCOL F\tCOL G\tCOL H\tCOL I\tCOL J\tCOL K\tCOL L
       ROW 1:  base\tground\tground\tground\tforest\tforest\tforest\tground\tground\twater\twater\tground
       ROW 2:  ground\tground\thill\tground\tforest\tforest\tforest\tground\tground\twater\twater\twater
@@ -139,22 +139,25 @@ Here follows the terrain layout.
       Row 12: ground\tground\tground\tground\tground\twater\tground\tground\tground\tground\tforest\tground
 """
 
+def prepare_messages(game_state: GameStateMessage, command: List[str]):
+    return [
+        {
+            "role": "system",
+            "content": system_message,
+        },
+        {
+            "role": "user",
+            "content": describe_game_state(game_state, command) ,
+        }
+    ]
+
 
 async def call_order_layer(game_state: GameStateMessage, command: List[str]) -> Order | None:
     try:
         # print(describe_game_state(game_state, command))
         return await client.chat.completions.create(
             model=DECISION_MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": system_message,
-                },
-                {
-                    "role": "user",
-                    "content": describe_game_state(game_state, command) ,
-                }
-            ],
+            messages=prepare_messages(game_state, command),
             response_model=Orders,
         ) # type: ignore
     except Exception as e:

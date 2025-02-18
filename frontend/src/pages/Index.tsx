@@ -37,13 +37,28 @@ const Index = () => {
 
   const parseOrders = (rawOrders: string) => {
     const parsedOrders: Orders = JSON.parse(rawOrders) as Orders
+
+    if (parsedOrders.reasoning && parsedOrders.reasoning.trim() !== '') {
+      setUiMessages(prev => [
+        ...prev, 
+        `Agent Log: ${parsedOrders.reasoning}`
+      ]);
+    }
+
     parsedOrders.orders.forEach(order => {
       const flatOrder = flattenOrder(order);
-      setUiMessages(prev => [...prev, `ORDER: ${flatOrder.unitName} go to ${flatOrder.targetRow}${flatOrder.targetColumn}, travel ${flatOrder.method}!`]);
+
+      setUiMessages(prev => [
+        ...prev, 
+        `Agent Order: ${flatOrder.unitName} go to ${flatOrder.targetRow}${flatOrder.targetColumn}, travel ${flatOrder.method}!`
+      ]);
+      
       const cartPos = algToCart(flatOrder.targetRow, flatOrder.targetColumn);
       if (!cartPos) return;  // Skip invalid positions
+      
       console.log(flatOrder.unitName, cartPos)
       const moveSafely = flatOrder.method === 'safe'; 
+      
       setGameState(prev => {
         const newGameState = setUnitTarget(flatOrder.unitName, cartPos, moveSafely, prev);
         return newGameState;
