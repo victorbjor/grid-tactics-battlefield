@@ -22,16 +22,20 @@ const SplashScreen = ({connected}: {connected: boolean}) => {
                     <h2 className="text-4xl font-bold mb-4">Grid Tactics Battlefield</h2>
                     <div className={`flex flex-col gap-10 w-1/2 text-2xl`}>
                         <p>
-                            This is a simple game, the goal is to protect a command base for as long as possible.
-                            But you are not in charge of the troops. 
+                            The goal of this game is to protect a command base for as long as possible.
+                            However, you are not in charge of the troops. 
                         </p>
                         <p>
-                            You give strategic orders to Lieutenant GPT, who will then give orders to the troops.
+                            You give strategic orders to an Agent, who will then think about how to play the game
+                            and give direct orders to the troops, while following your orders.
                         </p>
                         <p>
                             In the game, hills, forests, and the base are easier to defend and troops take less damage there.
-                            They also move slower there. The lieutenant will order troops to go to different locations, and tell
-                            them whether to prefer either a safe or fast route.
+                            They also move slower there. The Agent will order troops to go to different locations, and tell
+                            them whether to prefer a safe or fast route.
+                        </p>
+                        <p>
+                            The game starts when you send your first command.
                         </p>
                     </div>
                     {!gameRequested &&

@@ -29,7 +29,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ onSendMessage }) => {
       onSubmit={handleSubmit} 
       className="bg-white p-4 rounded-lg shadow-md flex flex-col h-full w-full max-w-[48rem] mx-auto col-span-2"
     >
-      <h3 className="font-bold mb-3">Order Lieutenant</h3>
+      <h3 className="font-bold mb-3">Orders to Agent</h3>
   
       <textarea
         value={message}
