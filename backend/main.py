@@ -87,7 +87,7 @@ async def get_leaderboard() -> List[Dict]:
 @app.post('/leaderboard', response_model=List[Dict])
 async def post_leaderboard(new_score: Score) -> List[Dict]:
     print(new_score)
-    leaderboard = get_leaderboard()
+    leaderboard = await get_leaderboard()
     
     leaderboard.append(new_score.model_dump())
     leaderboard.sort(key=lambda x: x["score"], reverse=True)
