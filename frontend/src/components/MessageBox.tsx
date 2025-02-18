@@ -9,11 +9,18 @@ interface MessageBoxProps {
 const MessageBox: React.FC<MessageBoxProps> = ({ onSendMessage }) => {
   const [message, setMessage] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (message.trim()) {
       onSendMessage(message);
       setMessage('');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
     }
   };
 
@@ -26,6 +33,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ onSendMessage }) => {
   
       <textarea
         value={message}
+        onKeyDown={handleKeyDown}
         onChange={(e) => setMessage(e.target.value)}
         placeholder="Enter command..."
         className="w-full flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none"
