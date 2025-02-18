@@ -1,4 +1,5 @@
 fastapi
 uvicorn
+upstash_redis   
 instructor
 openai

@@ -1,12 +1,29 @@
+import os
 import json
 import pickle
 from pprint import pprint
 from typing import List
-from fastapi import FastAPI, WebSocket
+
+from fastapi import FastAPI, WebSocket, Response
 from fastapi.middleware.cors import CORSMiddleware
+from upstash_redis import Redis
 
 from custom_types import GameStateMessage, MessageType, MovementMethod, Order, Position, Score, UnitID, UnitName, WebSocketMessage, UnitType
 from decision_layer import call_order_layer
+
+REDIS_KEY = os.getenv("UPSTASH_REDIS_REST_TOKEN")
+
+if REDIS_KEY is None:
+    raise ValueError("UPSTASH_REDIS_REST_TOKEN environment variable is not set.")
+
+REDIS_URL = os.getenv("UPSTASH_REDIS_REST_URL")
+
+if REDIS_URL is None:
+    raise ValueError("UPSTASH_REDIS_REST_URL environment variable is not set.")
+
+LEADERBOARD_KEY = "leaderboard"
+
+redis = Redis(url=REDIS_URL, token=REDIS_KEY)
 
 app = FastAPI()
 
@@ -61,29 +78,32 @@ async def websocket_endpoint(websocket: WebSocket):
         print(f"Error in websocket connection: {e}")
 
 
-leaderboard = []
-try:
-    with open("./leaderboard.pkl", "rb") as f:
-        leaderboard = pickle.load(f)
-except FileNotFoundError:
-    pass
-
-
 @app.get('/leaderboard', response_model=List[Score])
 async def get_leaderboard() -> List[Score]:
-    return leaderboard[:10]
+    data = await redis.get(LEADERBOARD_KEY)
+    if not data:
+        return []
+    return json.loads(data)[:10]
 
 
 @app.post('/leaderboard', response_model=List[Score])
 async def post_leaderboard(new_score: Score) -> List[Score]:
     print(new_score)
-    leaderboard.append(new_score)
-    leaderboard.sort(key=lambda x: x.score, reverse=True)
-    with open("./leaderboard.pkl", "wb") as f:
-        pickle.dump(leaderboard, f)
-
+    leaderboard = await get_leaderboard()
+    
+    leaderboard.append(new_score.model_dump())
+    leaderboard.sort(key=lambda x: x["score"], reverse=True)
+    
+    await redis.set(LEADERBOARD_KEY, json.dumps(leaderboard))
     return leaderboard[:10]
 
+@app.get('/healthz')
+async def healthz() -> List[Score]:
+    return Response(status_code=200)
+
+@app.get('/ping')
+async def ping() -> List[Score]:
+    return "I'm alive!"
 
 def issue_dummy_orders() -> Order:
     return Order(
