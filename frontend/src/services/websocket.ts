@@ -14,7 +14,29 @@ type WebSocketMessage = CommandMessage | GameStateMessage;
 
 class WebSocketService {
     private socket: WebSocket | null = null;
-    private readonly url: string = 'ws://localhost:8000/ws';
+    private readonly url: string = 'wss://grid-tactics-backend.onrender.com/ws';
+    private _connected: boolean = false;
+    private listeners: Set<(connected: boolean) => void> = new Set();
+
+    get connected() {
+        return this._connected;
+    }
+
+    private set connected(value: boolean) {
+        if (this._connected !== value) {
+            this._connected = value;
+            this.notifyListeners();
+        }
+    }
+
+    private notifyListeners() {
+        this.listeners.forEach(callback => callback(this._connected));
+    }
+
+    subscribeToConnection(callback: (connected: boolean) => void) {
+        this.listeners.add(callback);
+        return () => this.listeners.delete(callback); // Return unsubscribe function
+    }
 
     connect() {
         if (!this.socket) {
@@ -22,18 +44,27 @@ class WebSocketService {
             
             this.socket.onopen = () => {
                 console.log('WebSocket Connected');
+                this.connected = true;
             };
 
             this.socket.onclose = () => {
                 console.log('WebSocket Disconnected');
                 this.socket = null;
-                // Attempt to reconnect after 5 seconds
+                this.connected = false;
                 setTimeout(() => this.connect(), 5000);
             };
 
             this.socket.onerror = (error) => {
                 console.error('WebSocket Error:', error);
+                this.connected = false;
             };
+        }
+    }
+
+    disconnect() {
+        if (this.socket) {
+            this.socket.close();
+            this.socket = null;
         }
     }
 
@@ -54,7 +85,7 @@ class WebSocketService {
     }
 
     sendGameState(gameState: GameState, n=0) {
-        if (n > 10) return; // Prevent infinite recursion
+        if (n > 120) return; // Prevent infinite recursion
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             const unitList = Object.values(gameState.units);
             this.socket.send(JSON.stringify(
@@ -65,13 +96,6 @@ class WebSocketService {
             // Attempt to resend the game state after 1 second
             setTimeout(() => this.sendGameState(gameState), 1000);
             
-        }
-    }
-
-    disconnect() {
-        if (this.socket) {
-            this.socket.close();
-            this.socket = null;
         }
     }
 }

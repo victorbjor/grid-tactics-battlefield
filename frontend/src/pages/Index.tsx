@@ -22,7 +22,12 @@ const Index = () => {
   const elapsedTime = useRef<number>(0);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const gamePaused = useRef<boolean>(true);
-  
+  const [socketConnected, setSocketConnected] = useState(websocketService.connected);
+
+  useEffect(() => {
+      const unsubscribe = websocketService.subscribeToConnection(setSocketConnected);
+      return () => {unsubscribe()}; // Cleanup on unmount
+  }, []);
 
 // Initialize the game board with a fixed map layout
   useEffect(() => {
@@ -224,7 +229,7 @@ useEffect(() => {
                   onRestart={handleRestart}
               />
           )}
-          <SplashScreen />
+          <SplashScreen connected={socketConnected}/>
         </div>
       </div>
   );

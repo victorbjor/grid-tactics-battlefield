@@ -1,10 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-const GameOver = () => {
+const SplashScreen = ({connected}: {connected: boolean}) => {
     const [showSplash, setShowSplash] = useState<boolean>(true);
+    const [gameRequested, setGameRequested] = useState<boolean>(false);
+
+    useEffect(()=>{
+        if (connected && gameRequested) {
+            setShowSplash(false);
+        }
+    }, [connected, gameRequested])
+
     if (!showSplash) {
         return null;
     }
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center animate-fade-in">
             {/* Game Over and Controls */}
@@ -25,16 +34,23 @@ const GameOver = () => {
                             them whether to prefer either a safe or fast route.
                         </p>
                     </div>
-                    <button
-                            onClick={()=>setShowSplash(false)}
+                    {!gameRequested &&
+                        <button
+                            onClick={()=>setGameRequested(true)}
                             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
                             New Game
                         </button>
+                    }
+                    {gameRequested && !connected &&
+                        <p className={`text-2xl font-bold`}>
+                            Waiting for server...
+                        </p>
+                    }
                 </div>
             </div>
         </div>
     );
 };
 
-export default GameOver;
+export default SplashScreen;

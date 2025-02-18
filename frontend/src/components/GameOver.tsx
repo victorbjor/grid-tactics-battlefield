@@ -12,7 +12,7 @@ const GameOver = ({ survivalTime, onRestart }) => {
     const [playerName, setPlayerName] = useState('');
 
     useEffect(() => {
-        fetch('http://localhost:8000/leaderboard')
+        fetch('https://grid-tactics-backend.onrender.com/leaderboard')
             .then(res => {
                 if (!res.ok) {
                     console.log('Failed to fetch leaderbord');
@@ -34,7 +34,7 @@ const GameOver = ({ survivalTime, onRestart }) => {
         if (!playerName.trim()) return;
 
         try {
-            const response = await fetch('http://localhost:8000/leaderboard', {
+            const response = await fetch('https://grid-tactics-backend.onrender.com/leaderboard', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
