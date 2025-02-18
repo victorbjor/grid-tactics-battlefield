@@ -2,7 +2,7 @@ import os
 import json
 import pickle
 from pprint import pprint
-from typing import List
+from typing import List, Dict
 
 from fastapi import FastAPI, WebSocket, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -86,8 +86,8 @@ async def get_leaderboard() -> List[Score]:
     return json.loads(data)[:10]
 
 
-@app.post('/leaderboard', response_model=List[Score])
-async def post_leaderboard(new_score: Score) -> List[Score]:
+@app.post('/leaderboard', response_model=List[Dict])
+async def post_leaderboard(new_score: Score) -> List[Dict]:
     print(new_score)
     leaderboard = await get_leaderboard()
     
@@ -98,11 +98,11 @@ async def post_leaderboard(new_score: Score) -> List[Score]:
     return leaderboard[:10]
 
 @app.get('/healthz')
-async def healthz() -> List[Score]:
+async def healthz() -> Response:
     return Response(status_code=200)
 
 @app.get('/ping')
-async def ping() -> List[Score]:
+async def ping() -> str:
     return "I'm alive!"
 
 def issue_dummy_orders() -> Order:
