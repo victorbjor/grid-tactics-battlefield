@@ -78,9 +78,9 @@ async def websocket_endpoint(websocket: WebSocket):
         print(f"Error in websocket connection: {e}")
 
 
-@app.get('/leaderboard', response_model=List[Score])
-async def get_leaderboard() -> List[Score]:
-    data = await redis.get(LEADERBOARD_KEY)
+@app.get('/leaderboard', response_model=List[Dict])
+async def get_leaderboard() -> List[Dict]:
+    data = redis.get(LEADERBOARD_KEY)
     if not data:
         return []
     return json.loads(data)[:10]
@@ -89,12 +89,12 @@ async def get_leaderboard() -> List[Score]:
 @app.post('/leaderboard', response_model=List[Dict])
 async def post_leaderboard(new_score: Score) -> List[Dict]:
     print(new_score)
-    leaderboard = await get_leaderboard()
+    leaderboard = get_leaderboard()
     
     leaderboard.append(new_score.model_dump())
     leaderboard.sort(key=lambda x: x["score"], reverse=True)
     
-    await redis.set(LEADERBOARD_KEY, json.dumps(leaderboard))
+    redis.set(LEADERBOARD_KEY, json.dumps(leaderboard))
     return leaderboard[:10]
 
 @app.get('/healthz')
