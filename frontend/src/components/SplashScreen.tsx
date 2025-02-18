@@ -43,8 +43,9 @@ const SplashScreen = ({connected}: {connected: boolean}) => {
                         </button>
                     }
                     {gameRequested && !connected &&
-                        <p className={`text-2xl font-bold`}>
-                            Waiting for server...
+                        <p className={`text-2xl`}>
+                            <b>Waking up server...</b><br /><br />
+                            <i>(This may take up to 50s)</i>
                         </p>
                     }
                 </div>
