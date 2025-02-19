@@ -222,32 +222,34 @@ useEffect(() => {
 
 
   return (
-      <div className="min-h-screen bg-gray-100 p-8">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold mb-12 ">Strategic Command</h1>
+    <div className="min-h-screen bg-gray-100 p-2 sm:p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-8 md:mb-12">
+          Strategic Command
+        </h1>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="flex items-center justify-center lg:col-span-2">
-              <GameGrid grid={gameState.grid} units={gameState.units} />
-            </div>
-
-            <div className="space-y-8">
-              <Legend />
-              <InfoBox messages={uiMessages} />
-            </div>
-            <MessageBox onSendMessage={handleSendCommand} />
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
+          <div className="w-full lg:w-2/3 overflow-x-auto">
+            <GameGrid grid={gameState.grid} units={gameState.units} />
           </div>
 
-          {isGameOver && (
-              <GameOver
-                  survivalTime={elapsedTime.current / 1000}
-                  onRestart={handleRestart}
-              />
-          )}
-          <SplashScreen connected={socketConnected}/>
+          <div className="w-full lg:w-1/3 space-y-4">
+            <Legend />
+            <InfoBox messages={uiMessages} />
+            <MessageBox onSendMessage={handleSendCommand} />
+          </div>
         </div>
+
+        {isGameOver && (
+            <GameOver
+                survivalTime={elapsedTime.current / 1000}
+                onRestart={handleRestart}
+            />
+        )}
+        <SplashScreen connected={socketConnected}/>
       </div>
-  );
+    </div>
+);
 };
 
 export default Index;
